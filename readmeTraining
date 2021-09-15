@@ -1,0 +1,14 @@
+Selenium Test
+
+1. Make sure you have Java(https://www.java.com/download/) and Maven(https://maven.apache.org/download.cgi)  installed on your system, 
+if not follow the vendor instructions for installing them on your operating system
+
+2. In order to run test in CHROME browser make sure you have chromedriver(https://chromedriver.chromium.org/downloads) and it is accessibile
+   -in Linux OS family it would be in /usr/bin/ for example
+   -in Windows OS family you should export your chromedriver localization to system path
+   
+3. Clone this project
+
+4. Open command prompt and change directory (cd) to folder containing pom.xml
+
+5. Using Maven, you may now run test 'mvn test'
