@@ -9,70 +9,69 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
 import java.io.*;
 import java.sql.*;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
 public class SecondTest {
     private String targetUrl;
-    private String fileresult;
+    private String result;
     private String expectedUSD;
     private String expectedEUR;
     private String usdFromDatabase;
     private String eurFromDatabase;
     static String ADDRESS = "D:/Projects/url.json";
-    static int PauseInMilliSeconds = 1000;
+    private static final int PAUSEINMILLISECONDS = 1000;
 
     @Before
     public void readSettings() throws SQLException {
+
 
         try {
             FileReader reader = new FileReader(ADDRESS);
             JSONParser jsonParser = new JSONParser();
             JSONObject jsonObject = (JSONObject) jsonParser.parse(reader);
-            String url = (String) jsonObject.get("url");
-            String file = (String) jsonObject.get("file");
-            String usd = (String) jsonObject.get("1 USD");
-            String eur = (String) jsonObject.get("1 EUR");
+            this.targetUrl = (String) jsonObject.get("url");
+            this.result = (String) jsonObject.get("file");
+            this.expectedUSD = (String) jsonObject.get("1 USD");
+            this.expectedEUR = (String) jsonObject.get("1 EUR");
 
-            this.fileresult = file;
-            this.targetUrl = url;
-            this.expectedUSD = usd;
-            this.expectedEUR = eur;
-
-        } catch (FileNotFoundException ex) {
+        } catch (ParseException | IOException | NullPointerException ex) {
             ex.printStackTrace();
-        } catch (IOException ex) {
-            ex.printStackTrace();
-        } catch (ParseException ex) {
-            ex.printStackTrace();
-        } catch (NullPointerException ex) {
-            ex.printStackTrace();
+            System.exit(1);
         }
+
+
         String username = "postgres";
         String password = "Vasilchuk1";
         String url = "jdbc:postgresql://localhost:5432/postgres";
 
-        Connection connection = DriverManager.getConnection(url, username, password);
-
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM public.rates WHERE id = (?)")) {
+        Connection connection = null;
+        ResultSet resultSet = null;
+        ResultSet resultSet2 = null;
+        try {
+            connection = DriverManager.getConnection(url, username, password);
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM public.rates WHERE id = (?)");
 
             statement.setInt(1, 1);
-            ResultSet resultSet = statement.executeQuery();
+            resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                String usdRateInTable = resultSet.getString("rate");
-                this.usdFromDatabase = usdRateInTable;
+                this.usdFromDatabase = resultSet.getString("rate");
             }
             statement.setInt(1, 2);
-            ResultSet resultSet2 = statement.executeQuery();
+            resultSet2 = statement.executeQuery();
             if (resultSet2.next()) {
-                String eurRateInTable = resultSet2.getString("rate");
-                this.eurFromDatabase = eurRateInTable;
+                this.eurFromDatabase = resultSet2.getString("rate");
             }
         } finally {
-            connection.close();
+            if (connection != null)
+                connection.close();
+            if (resultSet != null)
+                resultSet.close();
+            if (resultSet2 != null)
+                resultSet2.close();
         }
     }
 
@@ -96,23 +95,23 @@ public class SecondTest {
 
         driver.manage().window().maximize();
         driver.get(targetUrl);
-        Thread.sleep(PauseInMilliSeconds);
+        Thread.sleep(PAUSEINMILLISECONDS);
 
         WebElement stat = driver.findElement(By.xpath(staticButtonXpath));
         stat.click();
-        Thread.sleep(PauseInMilliSeconds);
+        Thread.sleep(PAUSEINMILLISECONDS);
 
         WebElement rate = driver.findElement(By.xpath(currencyValue));
         rate.click();
-        Thread.sleep(PauseInMilliSeconds);
+        Thread.sleep(PAUSEINMILLISECONDS);
 
         WebElement BYN = driver.findElement(By.xpath(everyDayCurrencyValue));
         BYN.click();
-        Thread.sleep(PauseInMilliSeconds);
+        Thread.sleep(PAUSEINMILLISECONDS);
 
         WebElement date = driver.findElement(By.xpath(chooseDate));
         date.click();
-        Thread.sleep(PauseInMilliSeconds);
+        Thread.sleep(PAUSEINMILLISECONDS);
 
         WebElement dollar = driver.findElement(By.xpath(dollarXpath));
         WebElement valueD = driver.findElement(By.xpath(dollarValueXpath));
@@ -126,7 +125,7 @@ public class SecondTest {
 
 
         File file;
-        file = new File(fileresult);
+        file = new File(result);
         FileWriter fw = new FileWriter(file);
 
         BufferedWriter writer = new BufferedWriter(fw);
